@@ -1,0 +1,224 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:clouddrive="http://java.sun.com/jsf/composite/clouddrivecomp"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+
+    <!-- INTERFACE -->
+    <cc:interface>
+        <cc:attribute name="path" required="true" type="java.lang.String" />
+    </cc:interface>
+
+    <!-- IMPLEMENTATION -->
+    <cc:implementation>
+        <clouddrive:folder-settings path='#{cc.attrs.path}'>
+            <f:param name="path" value="#{cc.attrs.path}" />
+        </clouddrive:folder-settings>
+        <c:set value='#{filesController.getObjects(cc.attrs.path)}' var="fileObjects" scope="request" />
+        <h2 class="text-danger py-2">
+            #{filesController.error}
+        </h2>
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-action justify-content-between d-flex flex-row p-0">
+                <h:outputLink styleClass="flex-grow-1 text-decoration-none text-reset ps-3 link-info" value="index.xhtml">
+                    <i class="bi bi-folder-symlink-fill" />
+                    <c:choose>
+                        <c:when test="#{!cc.attrs.path.isEmpty()}">
+                            <f:param name="path" value="#{filesController.getPreviousPathName(cc.attrs.path)}" />
+                            ..
+                        </c:when>
+                        <c:otherwise>
+                            <f:param name="path" value="shares" />
+                            Shares
+                        </c:otherwise>
+                    </c:choose>
+                </h:outputLink>
+            </li>
+            <c:forEach var="item" items="#{fileObjects}">
+                <li class="list-group-item list-group-item-action justify-content-between d-flex flex-row p-0">
+                    <h:outputLink styleClass="flex-grow-1 text-decoration-none text-reset ps-3 link-info" value='#{item.isFolder() ? "index.xhtml" : "editor.xhtml"}'>
+                        <i class='bi #{item.isFolder() ? "bi-folder-fill" : "bi-file-earmark-fill"}' />
+                        <f:param name="path" value="#{filesController.getPath(item)}" />
+                        <c:choose>
+                            <c:when test='#{filesController.isShare(cc.attrs.path)}'>
+                                #{item.getPath(true)}
+                            </c:when>
+                            <c:otherwise>
+                                #{item.name}
+                            </c:otherwise>
+                        </c:choose>
+                    </h:outputLink>
+                    <div class="m-0 p-0 h-100">
+                        <h:form styleClass="m-0 p-0 h-100">
+                            <div class="d-flex d-row flex-nowrap">
+                                <c:choose>
+                                    <c:when test="#{filesController.canWrite(filesController.getPath(item))}">
+                                        <h:commandLink styleClass="btn btn-danger h-100 rounded-0 border-start border-1" p:data-bs-tooltip="tooltip" p:data-bs-title="Delete" action="#{filesController.deleteStorageObject(filesController.getPath(item))}">
+                                            <f:param name="path" value="#{cc.attrs.path}" />
+                                            <i class="bi bi-trash-fill" />
+                                        </h:commandLink>
+                                        <button class="btn btn-primary h-100 rounded-0 border-start border-1" type="button" data-bs-toggle="modal" data-bs-tooltip="tooltip" data-bs-title="Rename" data-bs-path="#{filesController.getPath(item)}" data-bs-target="#renameObjectModal">
+                                            <i class="bi bi-pencil-fill" />
+                                        </button>
+                                        <button class="btn btn-primary h-100 rounded-0 border-start border-1" type="button" data-bs-toggle="modal" data-bs-tooltip="tooltip" data-bs-title="Share" data-bs-path="#{filesController.getPath(item)}" data-bs-target="#shareObjectModal" data-bs-sharedTo="#{filesController.getShares(filesController.getPath(item))}">
+                                            <i class="bi bi-share-fill" />
+                                        </button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <h:commandLink styleClass="btn btn-primary h-100 rounded-0 border-start border-1" p:data-bs-tooltip="tooltip" p:data-bs-title="Copy" action="#{filesController.makeCopy(filesController.getPath(item))}">
+                                            <f:param name="path" value="#{cc.attrs.path}" />
+                                            <i class="bi bi-clipboard-plus-fill" />
+                                        </h:commandLink>
+                                    </c:otherwise>
+                                </c:choose>
+                                <h:commandLink styleClass="btn btn-primary h-100 rounded-0 border-start border-1" p:data-bs-tooltip="tooltip" p:data-bs-title="Download" action="#{filesController.downloadStorageObject(filesController.getPath(item))}">
+                                    <f:param name="path" value="#{cc.attrs.path}" />
+                                    <i class="bi bi-cloud-arrow-down-fill" />
+                                </h:commandLink>
+                            </div>
+                        </h:form>
+                    </div>
+                </li>
+            </c:forEach>
+        </ul>
+
+        <!-- Modals -->
+        <div class="modal fade" id="renameObjectModal" tabindex="-1" aria-labelledby="renameObjectModalTitle" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="renameObjectModalTitle">Rename</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <h:form>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <h:outputLabel for="objectName" class="col-form-label">New name:</h:outputLabel>
+                                <h:inputTextarea class="form-control" value="#{filesController.manipulationField}" id="objectName" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" id="renameModalPathInput" name="pathInput" />
+                            <h:commandButton styleClass="btn btn-primary" action="#{filesController.renameStorageObject()}" value="Rename">
+                                <f:param name="path" value="#{cc.attrs.path}" />
+                            </h:commandButton>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+        <h:outputScript>
+            const renameModal = document.getElementById('renameObjectModal');
+            if (renameModal) {
+                    renameModal.addEventListener('show.bs.modal', event => {
+                    const button = event.relatedTarget
+                    const path = button.getAttribute('data-bs-path')
+                    const pathInput = renameModal.querySelector('#renameModalPathInput')
+                    pathInput.value = path;
+                })
+            }
+        </h:outputScript>
+        <div class="modal fade" id="shareObjectModal" tabindex="-1" aria-labelledby="shareObjectModalTitle" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="shareObjectModalTitle">Share</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <h:form>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <p>Currently shared to:</p>
+                                <p id="sharedTo" />
+                                <br/>
+                                <h:outputLabel for="username" styleClass="col-form-label mb-1">Username:</h:outputLabel>
+                                <h:inputText styleClass="form-control mb-2" value="#{filesController.manipulationField}" id="username" />
+                                <h:outputLabel for="readOnlyInput" styleClass="form-check-label" value="Should share be read only?" />
+                                <input type="checkbox" id="readOnlyInput" class="form-check" name="isReadOnly" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" id="shareModalPathInput" name="pathInput" />
+                            <h:commandButton styleClass="btn btn-primary" action="#{filesController.shareStorageObject()}" value="Add share">
+                                <f:param name="path" value="#{cc.attrs.path}" />
+                            </h:commandButton>
+                            <h:commandButton styleClass="btn btn-danger" action="#{filesController.removeStorageObjectShare()}" value="Remove share">
+                                <f:param name="path" value="#{cc.attrs.path}" />
+                            </h:commandButton>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+        <h:outputScript>
+            const shareModal = document.getElementById('shareObjectModal');
+            if (shareModal) {
+                shareModal.addEventListener('show.bs.modal', event => {
+                    const button = event.relatedTarget
+                    const path = button.getAttribute('data-bs-path')
+                    const pathInput = shareModal.querySelector('#shareModalPathInput')
+                    pathInput.value = path
+                    const sharedTo = button.getAttribute('data-bs-sharedTo')
+                    console.log("Shared to:" + sharedTo)
+                    const sharedToParagraph = shareModal.querySelector("#sharedTo")
+                    sharedToParagraph.innerHTML = sharedTo
+                })
+            }
+        </h:outputScript>
+
+        <div class="modal fade" id="shareObjectModal" tabindex="-1" aria-labelledby="shareObjectModalTitle" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="shareObjectModalTitle">Share</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <h:form>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <p>Currently shared to:</p>
+                                <p id="sharedTo" />
+                                <br/>
+                                <h:outputLabel for="username" styleClass="col-form-label mb-1">Username:</h:outputLabel>
+                                <h:inputText styleClass="form-control mb-2" value="#{filesController.manipulationField}" id="username" />
+                                <h:outputLabel for="readOnlyInput" styleClass="form-check-label" value="Should share be read only?" />
+                                <input type="checkbox" id="readOnlyInput" class="form-check" name="isReadOnly" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" id="shareModalPathInput" name="pathInput" />
+                            <h:commandButton styleClass="btn btn-primary" action="#{filesController.shareStorageObject()}" value="Add share">
+                                <f:param name="path" value="#{cc.attrs.path}" />
+                            </h:commandButton>
+                            <h:commandButton styleClass="btn btn-danger" action="#{filesController.removeStorageObjectShare()}" value="Remove share">
+                                <f:param name="path" value="#{cc.attrs.path}" />
+                            </h:commandButton>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+        <h:outputScript>
+            const shareModal = document.getElementById('shareObjectModal');
+            if (shareModal) {
+                shareModal.addEventListener('show.bs.modal', event => {
+                    const button = event.relatedTarget
+                    const path = button.getAttribute('data-bs-path')
+                    const pathInput = shareModal.querySelector('#shareModalPathInput')
+                    pathInput.value = path
+                    const sharedTo = button.getAttribute('data-bs-sharedTo')
+                    console.log("Shared to:" + sharedTo)
+                    const sharedToParagraph = shareModal.querySelector("#sharedTo")
+                    sharedToParagraph.innerHTML = sharedTo
+                })
+            }
+        </h:outputScript>
+    </cc:implementation>
+</html>

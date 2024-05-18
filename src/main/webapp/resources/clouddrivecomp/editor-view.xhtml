@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:cc="http://java.sun.com/jsf/composite" xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<cc:interface>
+    <cc:attribute name="path" required="true" type="java.lang.String" />
+</cc:interface>
+
+<cc:implementation>
+    <c:if test="#{!cc.attrs.path.isEmpty()}">
+        <c:set value="#{fileController.setFile(cc.attrs.path)}" var="success" scope="request" />
+        <c:set value="#{fileController.status}" var="status" scope="request" />
+    </c:if>
+    <ui:fragment name="content" rendered="#{!cc.attrs.path.isEmpty()}">
+        <div class="h-100">
+            <h:form styleClass="h-100">
+                <h2 class="text-danger">#{status}</h2>
+                <h:inputTextarea styleClass="h-100 w-100 form-control" value="#{fileController.content}" rendered="#{success}" id="inputText" />
+                <h:commandButton value="Save" styleClass="btn btn-primary" action="#{fileController.saveAndClose(cc.attrs.path)}" rendered="#{success}">
+                    <f:param name="path" value="#{cc.attrs.path}" />
+                </h:commandButton>
+                <h:commandButton value='Cancel' styleClass="btn btn-danger" action='#{fileController.cancel(cc.attrs.path)}'>
+                    <f:param name="path" value="#{cc.attrs.path}" />
+                </h:commandButton>
+            </h:form>
+        </div>
+    </ui:fragment>
+    <ui:fragment name="content" rendered="#{cc.attrs.path.isEmpty()}">
+        No path specified
+    </ui:fragment>
+</cc:implementation>
+</html>

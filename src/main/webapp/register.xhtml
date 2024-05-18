@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="templates/base-template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://java.sun.com/jsf/core">
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{authController.accessLoginPage()}" />
+        </f:metadata>
+    </ui:define>
+    <ui:define name="main-content">
+        <div class="row justify-content-center">
+            <div class="col-6 d-flex flex-column justify-content-center border border-1 rounded-2 p-2">
+                <div class="m-3">
+                    <h1>Register</h1>
+                    <h:form>
+                        <h:outputLabel styleClass="form-label my-1" for="loginName">Login name</h:outputLabel>
+                        <h:inputText styleClass="form-control mb-2" id="loginName" value="#{registerController.loginName}"
+                                     required="true" requiredMessage="Login name is mandatory."
+                                     validator="#{uniqueLoginValidator.validate}">
+                        </h:inputText>
+
+                        <h:outputLabel styleClass="form-label my-1" for="firstName">First name</h:outputLabel>
+                        <h:inputText styleClass="form-control mb-2" id="firstName" value="#{registerController.firstName}"/>
+
+                        <h:outputLabel styleClass="form-label my-1" for="secondName">Second name</h:outputLabel>
+                        <h:inputText styleClass="form-control mb-2" id="secondName" value="#{registerController.secondName}"/>
+
+                        <h:outputLabel styleClass="form-label my-1" for="password">Password</h:outputLabel>
+                        <h:inputSecret styleClass="form-control mb-2" id="password" value="#{registerController.password}"
+                                       binding="#{passwordComponent}">
+                            <f:validator validatorId="passwordStrengthValidator"/>
+                        </h:inputSecret>
+
+                        <h:outputLabel styleClass="form-label my-1" for="confirmPassword">Confirm password</h:outputLabel>
+                        <h:inputSecret styleClass="form-control mb-2" id="confirmPassword" value="#{registerController.confirmPassword}">
+                            <f:validator validatorId="confirmPasswordValidator"/>
+                            <f:attribute name="passwordComponentBinding" value="#{passwordComponent}"/>
+                        </h:inputSecret>
+                        <h:messages styleClass="text-danger" showDetail="true"/>
+                        <h:commandButton styleClass="btn btn-primary my-1" type="submit" value="Register" action="#{registerController.createUser()}"/>
+                    </h:form>
+                    <a class="link-info my-2" href="login.xhtml">Already have an account? Click here</a>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

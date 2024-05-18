@@ -1,0 +1,41 @@
+/*body {*/
+/*    background-color: #ffffff;*/
+/*    font-size: 12pt;*/
+/*    font-family:  sans-serif;*/
+/*    color: #000000;  */
+/*    margin-left: auto;*/
+/*    margin-right: auto;*/
+/*    width: 800px;*/
+/*}*/
+
+/*h1 {*/
+/*    font-size:  30pt;*/
+/*    font-weight: bold;*/
+/*    margin: 0px;*/
+/*    padding: 0px;*/
+/*    color: #000099;*/
+/*}*/
+
+/*a:link, a:visited {*/
+/*  color: #3366cc;*/
+/*  font-weight : bold;*/
+/*  text-decoration: none;*/
+/*}*/
+
+/*a:link:hover, a:visited:hover  {*/
+/*  color: #3366cc;;*/
+/*  font-weight : bold;*/
+/*  text-decoration : underline;*/
+/*}*/
+
+.toggle-list {
+    cursor: pointer;
+}
+
+.toggle-list-sublist {
+    display: none; /* Initially hiding list items */
+}
+
+.expand {
+    display: block; /* Display when list is open */
+}

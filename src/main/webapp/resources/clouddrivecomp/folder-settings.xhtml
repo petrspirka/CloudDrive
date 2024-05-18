@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:clouddrive="http://java.sun.com/jsf/composite/clouddrivecomp" xmlns:f="http://java.sun.com/jsf/core">
+
+    <cc:interface>
+        <cc:attribute name="path" required="true" type="java.lang.String" />
+    </cc:interface>
+
+    <cc:implementation>
+        <span>
+        #{cc.attrs.path}
+        </span>
+        <div class="modal fade" id="newObjectModal" tabindex="-1" aria-labelledby="newObjectModalTitle" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="newObjectModalTitle">Create new</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <h:form>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <h:outputLabel for="objectName" class="col-form-label">Name:</h:outputLabel>
+                                <h:inputTextarea class="form-control" value="#{filesController.manipulationField}" id="objectName" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <h:commandButton styleClass="btn btn-primary" action="#{filesController.addFile(cc.attrs.path)}" value="Create file">
+                                <f:param name="path" value="#{cc.attrs.path}" />
+                            </h:commandButton>
+                            <h:commandButton styleClass="btn btn-primary" action="#{filesController.addFolder(cc.attrs.path)}" value="Create folder">
+                                <f:param name="path" value="#{cc.attrs.path}" />
+                            </h:commandButton>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newObjectModal">Create new...</button>
+
+
+        <div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalTitle" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="uploadFileModalTitle">Create new</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <h:form enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <h:outputLabel for="objectName" class="col-form-label">Select a file:</h:outputLabel>
+                                <h:inputFile class="form-control" value="#{filesController.file}" id="file" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <h:commandButton styleClass="btn btn-primary" action="#{filesController.uploadFile(cc.attrs.path)}" value="Create file">
+                                <f:param name="path" value="#{cc.attrs.path}" />
+                            </h:commandButton>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadFileModal">Upload file...</button>
+    </cc:implementation>
+
+</html>

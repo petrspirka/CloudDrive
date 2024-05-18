@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<ui:composition template="base-template.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets">
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{authController.accessProtectedPage}" />
+        </f:metadata>
+    </ui:define>
+
+    <body>
+        <ui:define name="main-content">
+
+            <header>
+                <ui:insert name="top">
+                    <ui:include src="page-header.xhtml" />
+                </ui:insert>
+            </header>
+
+            <main class="h-100">
+                <ui:insert name="content">Content</ui:insert>
+            </main>
+        </ui:define>
+    </body>
+
+</ui:composition>
